@@ -11,7 +11,7 @@ import numpy as np
 if __name__=='__main__':
 
     x0 = 0.8
-    n = 10 #state space discretization size
+    n = 1000 #state space discretization size
     X = np.linspace(-1,1,n)
 
     N = 100 #number of time steps
@@ -21,31 +21,46 @@ if __name__=='__main__':
     u = np.zeros((N,n)) #control
 
     x_sol = np.zeros(N+1)
+    print "X:\n",X
 
-    for i in range(N,-1,-1):
+    for t in range(N,-1,-1):
 
-        if i == N:
+        if t == N:
 
             for j in range(X.size):
-                J[i,j] = terminal_cost(X[j])
+                J[t,j] = terminal_cost(X[j])
+
+            #print('t = ', t, ' J = ', J[t,:])
 
         else:
 
             for j in range(X.size):
                 for k in range(X.size):
-                    J_temp[k] = current_cost(X[j],find_u(X[j],X[k],dt),dt) + J[i+1,k]
+
+                    u_temp = find_u(X[j],X[k],dt)
+                    J_temp[k] = current_cost(X[j], u_temp, dt) + J[t+1,k]
+
+                    #print('k = ', k, 'u =', u_temp, ' inc cost = ', current_cost(X[j],find_u(X[j],X[k],dt),dt), ' J(t+1,k) = ', J[t+1,k])
+
+
+
+
 
                 x_next_idx = np.argmin(J_temp)
-                u[i,j] = find_u(X[j],X[x_next_idx],dt)
-                J[i,j] = current_cost(X[j],u[i,j],dt) + J[i+1,x_next_idx]
 
 
-    print "X:\n",X
-    print "J:\n",J
-    print "u:\n",u
+                #print('j = ', j, '   J_temp', J_temp)
+                #print('current idx = ', j,'  x_next_idx = ', x_next_idx)
+
+                u[t,j] = find_u(X[j],X[x_next_idx],dt)
+                J[t,j] = current_cost(X[j],u[t,j],dt) + J[t+1,x_next_idx]
+
+            #print('t = ', t, ' J = ', J[t,:])
+
+
+    #print "u:\n",u
 
     x_sol[0] = x0
-    x_sol[0] = X[find_nearest(X,x_sol[0])]
     U_opti = np.zeros(N)
 
     for i in range(N):
@@ -60,7 +75,8 @@ if __name__=='__main__':
 
             U_opti[i] = u[i,idx]
 
-        x_sol[i+1] = model(x_sol[i],U_opti[i], dt)
+        x_sol[i+1] = model(x_sol[i], U_opti[i], dt)
+
 
     print "Solution:", x_sol
     print "U:", U_opti
@@ -72,5 +88,5 @@ if __name__=='__main__':
             j = find_nearest(X,x_sol[i])
             cost_to_go[i] = J[i,j]
 
-    print "cost:",cost_to_go
+    #print "cost to go:",cost_to_go
     plot_func(J,X,N,x_sol,cost_to_go,dt)
