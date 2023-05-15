@@ -137,6 +137,53 @@ def solve_DP_HJB(X, x0, xT, n, N, epsilon = 0.0):
 
     return J,u
 
+def solve_LQR(N_steps, del_t):
+    
+    K = np.zeros(N_steps) # feedback gain
+    Ac = 1;#linear system A continuous
+    Bc = 1;# linear system B continuous
+    
+    Ad = Ac + 1*del_t #linear system A discrete
+    Bd = Bc*del_t # linear system B discrete
+    
+    setting = "continuous"; #"discrete","continuous"
+    
+    if setting == "continuous":
+        
+        #continuous time lqr
+        for i in range(N_steps,-1,-1):
+        
+            if i == N_steps:
+                P = Qf;
+            
+            else:
+                P_dot = -(Ac*P + P*Ac - (P*Bc*Bc*P/R) + Q)
+                P = P - P_dot*del_t
+                K[i] = - (1.0/R)*Bc*P
+                #print("K:", K[i])
+
+        return K,P
+    
+        
+        
+    else:
+        #discrete time lqr
+        print("executing discrete")
+        for i in range(N_steps,-1,-1):
+            
+            if i == N_steps:
+                P = Qf;
+                
+            else:
+                
+                K[i] = - (1.0/(R*del_t + Bd*P*Bd))*Bd*P*Ad
+                #print("K:", K[i])
+                P = Q*del_t + Ad*P*Ad + Ad*P*Bd*K[i]
+            
+        
+        return K,P
+    
+    
 def monteCarloSims(X, x0, xT, N, dt, del_t, epsi_range, iters=50):
 
     N_steps = int(N*dt / del_t) # number of steps the system propagates
@@ -184,18 +231,18 @@ def monteCarloSims(X, x0, xT, N, dt, del_t, epsi_range, iters=50):
             file.write(str(epsilon) + ',' + str(np.mean(cost_vector)) + ',' + str(np.var(cost_vector)) + ',' + str(time_taken) + '\n')
 
 def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
-
-    J, u = solve_DP_HJB(X, x0, xT, n, N, 0.0)
-    #J, u = solve_DP_Bellman(X, x0, xT, n, N, 0.0)
-
-    print('DP solved.')
-
+    
     N_steps = int(N*dt / del_t) # number of steps the system pro
 
     factor_del_t = int(del_t / dt)
 
     #print('N_steps = ', N_steps, ' Factor = ', factor_del_t)
+    
+    J, u = solve_DP_HJB(X, x0, xT, n, N, 0.0)
+    #J, u = solve_DP_Bellman(X, x0, xT, n, N, 0.0)
 
+    print('DP solved.')
+    
     x_sol = np.zeros(N_steps+1)
     x_sol[0] = x0
     U_opti = np.zeros(N_steps)
@@ -211,8 +258,8 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
         x_sol[i+1] = model(x_sol[i],U_opti[i], del_t, epsilon)
 
     print("Solution:")
-    for t, x_temp, u_temp in zip(range(N_steps),x_sol, U_opti):
-        print('t =', t, '   X:', x_temp, '   U:',u_temp)
+    #for t, x_temp, u_temp in zip(range(N_steps),x_sol, U_opti):
+    #    print('t =', t, '   X:', x_temp, '   U:',u_temp)
     print('t =', N_steps, '   X:', x_sol[N_steps])
 
     cost = calculate_cost(x_sol,U_opti,xT,del_t)
@@ -222,18 +269,46 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
     for i in range(N_steps+1):
         j = find_nearest(X,x_sol[i])
         cost_to_go[i] = J[i*factor_del_t,j]
+    
+    print("cost-to-go DP:", cost_to_go[0])
+    #plot_func(J,X,N,x_sol,cost_to_go,U_opti,dt)
+    
+    
+    #LQR solution
+    
+    K, P = solve_LQR(N, dt)
+    x_sol_lqr = np.zeros(N_steps+1)
+    x_sol_lqr[0] = x0
+    U_opti_lqr = np.zeros(N_steps)
 
-    plot_func(J,X,N,x_sol,cost_to_go,U_opti,dt)
+    for i in range(N_steps):
 
+        U_opti_lqr[i] = -K[i*factor_del_t]*(xT - x_sol_lqr[i])
+
+        x_sol_lqr[i+1] = model(x_sol_lqr[i],U_opti_lqr[i], del_t, epsilon)
+    
+    print("Solution LQR:")
+    #for t, x_temp, u_temp in zip(range(N_steps),x_sol_lqr, U_opti_lqr):
+        #print('t =', t, '   X:', x_temp, '   U:',u_temp)
+    print('t =', N_steps, '   X:', x_sol_lqr[N_steps])
+
+    cost_lqr = calculate_cost(x_sol_lqr,U_opti_lqr,xT,del_t)
+    print("cost:", cost_lqr)
+    
+    cost_to_go_lqr = 0.5*P*((xT - x0)**2)
+    print("cost-to-go lqr:", cost_to_go_lqr)
+    
+    plot_control(U_opti[i], U_opti_lqr, x_sol, x_sol_lqr, N, dt)
+    
 if __name__=='__main__':
 
     x0 = 1.0 #initial state.
-    xT = 4.8 #final state.
+    xT = 1.8 #final state.
 
     n = 50 #state space discretization size
     N = 60000 #number of time steps
     dt = 1.0/N #dt - time step for DP solution.
-    del_t = 0.02 #del_t - time step for model update.
+    del_t = dt #0.02 #del_t - time step for model update.
 
     X = np.linspace(0,5,n) #space discretization
 
