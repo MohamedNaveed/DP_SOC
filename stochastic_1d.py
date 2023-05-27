@@ -276,6 +276,7 @@ def monteCarloSims(X, x0, xT, N, dt, del_t, epsi_range, iters=50):
 
 def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
     
+    
     N_steps = int(N*dt / del_t) # number of steps the system pro
 
     factor_del_t = int(del_t / dt)
@@ -302,6 +303,8 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
         x_sol[i+1] = model(x_sol[i],U_opti[i], del_t, epsilon)
 
     print("Solution:")
+    #for t, x_temp, u_temp in zip(range(N_steps),x_sol, U_opti):
+    #    print('t =', t, '   X:', x_temp, '   U:',u_temp)
     #for t, x_temp, u_temp in zip(range(N_steps),x_sol, U_opti):
     #    print('t =', t, '   X:', x_temp, '   U:',u_temp)
     print('t =', N_steps, '   X:', x_sol[N_steps])
@@ -378,7 +381,7 @@ def check_LQR(N, dt, x0, xT):
 if __name__=='__main__':
 
     x0 = 1.0 #initial state.
-    xT = 0.0 #final state.
+    xT = 4.8 #final state.
 
     n = 200 #state space discretization size
     N = 50 #number of time steps
