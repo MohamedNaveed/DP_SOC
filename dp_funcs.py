@@ -18,7 +18,7 @@ params = {'axes.labelsize':12,
             'xtick.labelsize':10,
             'ytick.labelsize':10,
             'text.usetex':False,
-            'figure.figsize':[4.5,4.5]}
+            'figure.figsize':[5,5]}
 pylab.rcParams.update(params)
 
 R = 1.0
@@ -41,8 +41,9 @@ def terminal_cost(x, xT):
 
 def f(x):
 
-    return(-x -2*(x**2) -0.5*(x**3))
+    #return(-x -2*(x**2) -0.5*(x**3))
     #return(-m.cos(x))
+    return(x)
 
 def g(x):
 
@@ -61,6 +62,25 @@ def find_u(x, x_next, dt):
     u = ((x_next - x)/dt - f(x))/g(x)
 
     return u
+
+def plot_control(u_dp, u_lqr, x_dp, x_lqr, N, dt):
+    
+    pylab.figure(1)
+    t = np.linspace(0,(N-1)*dt,N)
+    pylab.plot(t,u_dp - u_lqr,'r.-')
+    pylab.xlabel('Time')
+    pylab.ylabel('difference in U')
+    pylab.savefig('difference_u.png')
+    
+    pylab.figure(2)
+    t = np.linspace(0,(N)*dt,N+1)
+    pylab.plot(t,x_dp - x_lqr,'r.-')
+    pylab.xlabel('Time')
+    pylab.ylabel('difference in x')
+    pylab.savefig('difference_x.png')
+
+    
+
 
 def plot_func(V,X,N,x_sol,cost,U,dt):
 
@@ -120,6 +140,7 @@ def calculate_cost(x, u, xT, dt):
     cost = 0
     for i in range(N):
         cost += current_cost(x[i],u[i],xT,dt)
+        #print("cost: ", cost)
         #print("i:", i, " Cost:", round(cost,2), " x:",round(x[i],2), " u:", round(u[i],2))
     cost += terminal_cost(x[N],xT)
     #print("i:", N, " Cost:", round(cost,2), " x:", round(x[N],2))
@@ -130,7 +151,7 @@ def Exp_J(x, u, J, X, dt, epsilon):
 
     #calculating expectation of J using monte carlo
 
-    N_samples = 100 # number of monte carlo samples.
+    N_samples = 1 # number of monte carlo samples.
 
     cost = 0
 
