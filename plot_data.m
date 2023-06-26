@@ -1,6 +1,6 @@
 clc; clear;
 
-load("dp_v1_lqr_n_1000_N_50.mat");
+load("Data/dp_hjb_lqr_n_200_N_300000_epsi10.mat");
 
 t_steps = double((0:N))*dt;
 
@@ -55,7 +55,7 @@ J_lqr = zeros(N+1,n);
 
 for t = 1:N+1
     
-    J_lqr(t,:) = 0.5*P(t)*(X.^2) ;
+    J_lqr(t,:) = 0.5*P(t)*(X.^2) + q(t);
     
 end
 
@@ -72,12 +72,12 @@ end
 VIDEO_OUTPUT = false;
 
 if VIDEO_OUTPUT
-    myVideo = VideoWriter('/home/naveed/Documents/Dynamic_programming/cost_to_go_comp_v1_n_200_N_100000'); %open video file
+    myVideo = VideoWriter('/home/naveed/Documents/Dynamic_programming/cost_to_go_comp_dp_hjb_lqr_n_200_N_300000_epsi10'); %open video file
     myVideo.FrameRate = 10;
     open(myVideo)
 end
 
-frame_frequency = 1;
+frame_frequency = 1000;
 
 for t=N+1:-frame_frequency:1
 %for t=99990
@@ -107,10 +107,9 @@ for t=N+1:-frame_frequency:1
         legend();
         pause(0.01);
         hold off;
-        
-        
     end
-    %}
+    %} 
+    
 if VIDEO_OUTPUT
 %Video output
     frame = getframe(gcf); %get frame
