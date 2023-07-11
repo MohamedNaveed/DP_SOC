@@ -13,9 +13,9 @@ import time
 FILE_WRITE = True# False | True
 
 if FILE_WRITE:
-    filename = "stochastic_dp_lqr_T300000_X200_processNoise.csv"
+    filename = "stochastic_hjb_1dcos_T300000_X200_processNoise_e0.csv"
     file = open(filename,"a")
-    file.write('epsilon' + ',' + 'Average Cost' + ',' + 'Cost variance' + ',' + 'Average Time' + '\n' )
+    file.write('epsilon' + ',' + 'Average Cost' + ',' + 'Cost variance' + ',' + 'Time taken' + '\n' )
 
 def Jx_func(j, J, X):
 
@@ -236,7 +236,7 @@ def solve_LQR(N_steps, del_t, epsilon):
 
     
     
-def monteCarloSims(X, x0, xT, N, dt, del_t, epsi_range, iters=50):
+def monteCarloSims(X, x0, xT, N, dt, del_t, FIX_DP_EPSILON, epsi_range, iters=50):
 
     N_steps = int(N*dt / del_t) # number of steps the system propagates
 
@@ -250,23 +250,28 @@ def monteCarloSims(X, x0, xT, N, dt, del_t, epsi_range, iters=50):
 
     #J, u = solve_DP_Bellman(X, x0, xT, n, N, 0.0)
     #J, u = solve_DP_HJB(X, x0, xT, n, N, 0.0)
-
+    if FIX_DP_EPSILON:
+        J, u = solve_DP_HJB(X, x0, xT, n, N, dt, 0.0)
+    
     for epsilon in epsi_range:
-
+        
+        print("epsilon:", epsilon)
         start_exec = time.time()
-
-        J, u = solve_DP_HJB(X, x0, xT, n, N, dt, epsilon)
+        
+        if not FIX_DP_EPSILON:
+            J, u = solve_DP_HJB(X, x0, xT, n, N, dt, epsilon)
         #J, u = solve_DP_Bellman(X, x0, xT, n, N, epsilon)
         #LQR solution
-        K, P, q, _, _ = solve_LQR(N, dt, epsilon)
+        
+        #K, P, q, _, _ = solve_LQR(N, dt, epsilon)
     
         cost_vector = np.zeros(iters)
-        cost_vector_lqr = np.zeros(iters)
+        #cost_vector_lqr = np.zeros(iters)
 
         for iter in range(iters):
-
+            print("iter:", iter)
             U_opti = np.zeros(N_steps)
-            U_opti_lqr = np.zeros(N_steps)
+            #U_opti_lqr = np.zeros(N_steps)
 
             for i in range(N_steps):
                 
@@ -278,26 +283,26 @@ def monteCarloSims(X, x0, xT, N, dt, del_t, epsi_range, iters=50):
                 x_sol[i+1] = model(x_sol[i],U_opti[i], del_t, epsilon)
                 
                 #LQR
-                U_opti_lqr[i] = -K[i*factor_del_t]*(xT - x_sol_lqr[i])
+                #U_opti_lqr[i] = -K[i*factor_del_t]*(xT - x_sol_lqr[i])
 
-                x_sol_lqr[i+1] = model(x_sol_lqr[i],U_opti_lqr[i], del_t, epsilon)
+                #x_sol_lqr[i+1] = model(x_sol_lqr[i],U_opti_lqr[i], del_t, epsilon)
 
             #print "Solution:", x_sol
             #print "U:", U_opti
             cost = calculate_cost(x_sol, U_opti, xT, del_t)
             cost_vector[iter] = cost
             
-            cost_lqr = calculate_cost(x_sol_lqr, U_opti_lqr, xT, del_t)
-            cost_vector_lqr[iter] = cost_lqr
+            #cost_lqr = calculate_cost(x_sol_lqr, U_opti_lqr, xT, del_t)
+            #cost_vector_lqr[iter] = cost_lqr
 
         end_exec = time.time()
         time_taken = (end_exec - start_exec)/iters
-        print("DP: epsilon:", epsilon , "   Average Cost:",np.mean(cost_vector), "  Cost var:", np.var(cost_vector))
-        print("LQR: epsilon:", epsilon , "   Average Cost:",np.mean(cost_vector_lqr), "  Cost var:", np.var(cost_vector_lqr))
+        print("epsilon:", epsilon , "   Average Cost:",np.mean(cost_vector), "  Cost var:", np.var(cost_vector))
+        #print("LQR: epsilon:", epsilon , "   Average Cost:",np.mean(cost_vector_lqr), "  Cost var:", np.var(cost_vector_lqr))
         
         if FILE_WRITE:
-            file.write('DP' + ',' + str(epsilon) + ',' + str(np.mean(cost_vector)) + ',' + str(np.var(cost_vector)) + '\n')
-            file.write('LQR' + ',' + str(epsilon) + ',' + str(np.mean(cost_vector_lqr)) + ',' + str(np.var(cost_vector_lqr)) + '\n')
+            file.write(str(epsilon) + ',' + str(np.mean(cost_vector)) + ',' + str(np.var(cost_vector)) + ',' + str(time_taken) + '\n')
+            #file.write('LQR' + ',' + str(epsilon) + ',' + str(np.mean(cost_vector_lqr)) + ',' + str(np.var(cost_vector_lqr)) + '\n')
 
 def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
     
@@ -348,6 +353,7 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
     
     
     #LQR solution
+    '''
     K, P, q, _, _ = solve_LQR(N, dt, epsilon)
     x_sol_lqr = np.zeros(N_steps+1)
     x_sol_lqr[0] = x0
@@ -379,8 +385,12 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
     var_dic = {"u_dp": U_opti, "u_lqr": U_opti_lqr, 
                 "x_dp": x_sol, "x_lqr": x_sol_lqr, "N": N, "dt": dt,
                 "J": J, "u_global": u, "X": X, "P": P, "K": K, "q": q}
-    savemat("dp_hjb_lqr_n_200_N_300000_epsi100_delt_01.mat",var_dic)
-
+    savemat("dp_hjb_lqr_n_200_N_300000_epsi1000.mat",var_dic)
+    '''
+    var_dic = {"u_dp": U_opti, "x_dp": x_sol, "N": N, "dt": dt,
+                "J": J, "u_global": u, "X": X}
+    savemat("dp_hjb_1dcos_n_200_N_300000_epsi0.mat",var_dic)
+    
 def check_LQR(N, dt, x0, xT):
 
     #LQR solution
@@ -441,12 +451,14 @@ if __name__=='__main__':
     N = 300000 #number of time steps
     dt = 1.0/N #dt - time step for DP solution.
 
-    del_t = 0.01 #del_t - time step for model update.
+    del_t = dt #0.01 #del_t - time step for model update.
 
     X = np.linspace(-2,2,n) #space discretization
 
     #np.random.seed(2)
 
-    #sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 10.0)
+    #sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0)
     #check_LQR(N, dt, x0, xT)
-    monteCarloSims(X, x0, xT, N, dt, del_t, epsi_range = np.linspace(0.0,1.0,3),iters=100)
+    FIX_DP_EPSILON = True
+    epsi_range = np.array([0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,4.0,6.0,8.0,10.0])
+    monteCarloSims(X, x0, xT, N, dt, del_t, FIX_DP_EPSILON, epsi_range,iters=100)

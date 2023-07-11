@@ -1,6 +1,7 @@
 clc; clear;
 
-load("Data/dp_hjb_lqr_n_200_N_300000_epsi10.mat");
+%load("Data/dp_hjb_1dcos_n_200_N_300000_epsi0_1.mat");
+load("Data/dp_hjb_lqr_n_200_N_300000.mat");
 
 t_steps = double((0:N))*dt;
 
@@ -55,7 +56,7 @@ J_lqr = zeros(N+1,n);
 
 for t = 1:N+1
     
-    J_lqr(t,:) = 0.5*P(t)*(X.^2) + q(t);
+    J_lqr(t,:) = 0.5*P(t)*(X.^2);% + q(t);
     
 end
 
@@ -77,9 +78,10 @@ if VIDEO_OUTPUT
     open(myVideo)
 end
 
-frame_frequency = 1000;
+frame_frequency = 100;
 
 for t=N+1:-frame_frequency:1
+%for t=299900:-frame_frequency:1
 %for t=99990
     t
     
@@ -95,7 +97,7 @@ for t=N+1:-frame_frequency:1
     hold off;
     
    
-    %{
+    
     if t ~= N+1
         figure(2);
         plot(X, u_global(t,:),'LineWidth',2, 'DisplayName', 'DP');
@@ -108,7 +110,7 @@ for t=N+1:-frame_frequency:1
         pause(0.01);
         hold off;
     end
-    %} 
+    
     
 if VIDEO_OUTPUT
 %Video output

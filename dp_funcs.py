@@ -42,8 +42,8 @@ def terminal_cost(x, xT):
 def f(x):
 
     #return(-x -2*(x**2) -0.5*(x**3))
-    #return(-m.cos(x))
-    return(x)
+    return(-m.cos(x))
+    #return(x)
 
 def g(x):
 
@@ -76,11 +76,9 @@ def plot_control(u_dp, u_lqr, x_dp, x_lqr, N, dt):
     t = np.linspace(0,(N)*dt,N+1)
     pylab.plot(t,x_dp - x_lqr,'r.-')
     pylab.xlabel('Time')
-<<<<<<< HEAD
+
     pylab.ylabel('difference in x')
-=======
-    pylab.ylabel('difference in U')
->>>>>>> 8ead1cf6681f444dc38b6be94b8f960c8c92dabf
+
     pylab.savefig('difference_x.png')
 
     
