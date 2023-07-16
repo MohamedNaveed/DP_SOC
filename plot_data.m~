@@ -79,29 +79,20 @@ if VIDEO_OUTPUT
 end
 
 frame_frequency = 1000;
-font_size = 16;
-%for t=N+1:-frame_frequency:1
+
+for t=N+1:-frame_frequency:1
 %for t=299900:-frame_frequency:1
-for t=245000
+%for t=99990
     t
     
-    fig = figure(1);
-    plot(X, J(t,:),'r','LineWidth',3, 'DisplayName', 'HJB-FD');
+    figure(1);
+    plot(X, J(t,:),'LineWidth',2, 'DisplayName', 'DP');
     hold on;
-    plot(X, J_lqr(t,:),'b--','LineWidth',3, 'DisplayName', 'LQR');
-    ax = gca;
-    ax.FontSize = 16; 
-    xlabel('State','FontSize',font_size);
-    ylabel('Cost-to-go','FontSize',font_size);
-    %title(['t = ', num2str(t)]);
-    h = legend();
-    set(h,'FontSize',font_size);
-    set(fig,'Units','inches');
-    screenposition = get(fig,'Position');
-    set(fig,...
-        'PaperPosition',[0 0 screenposition(3:4)],...
-        'PaperSize',[screenposition(3:4)]);
-    %print -dpdf -painters '/home/naveed/Dropbox/Research/Manuscripts/TAC22/plots/ctg_e0.pdf'
+    plot(X, J_lqr(t,:),'--','LineWidth',2, 'DisplayName', 'LQR');
+    xlabel('X');
+    ylabel('Cost');
+    title(['t = ', num2str(t)]);
+    legend();
     pause(0.001);
     hold off;
     
@@ -109,9 +100,9 @@ for t=245000
     
     if t ~= N+1
         figure(2);
-        plot(X, u_global(t,:),'r','LineWidth',2, 'DisplayName', 'HJB-FD');
+        plot(X, u_global(t,:),'LineWidth',2, 'DisplayName', 'DP');
         hold on;
-        plot(X, u_lqr_global(t,:),'b--','LineWidth',2, 'DisplayName', 'LQR');
+        plot(X, u_lqr_global(t,:),'--','LineWidth',2, 'DisplayName', 'LQR');
         xlabel('X');
         ylabel('Control');
         title(['t = ', num2str(t)]);

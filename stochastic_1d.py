@@ -10,7 +10,7 @@ import numpy as np
 from scipy.io import savemat
 import time
 
-FILE_WRITE = True# False | True
+FILE_WRITE = False# False | True
 
 if FILE_WRITE:
     filename = "stochastic_hjb_1dcos_T300000_X200_processNoise_e0.csv"
@@ -389,7 +389,7 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
     '''
     var_dic = {"u_dp": U_opti, "x_dp": x_sol, "N": N, "dt": dt,
                 "J": J, "u_global": u, "X": X}
-    savemat("dp_hjb_1dcos_n_200_N_300000_epsi0.mat",var_dic)
+    savemat("dp_hjb_1dpoly_n_200_N_300000_epsi0.mat",var_dic)
     
 def check_LQR(N, dt, x0, xT):
 
@@ -457,8 +457,8 @@ if __name__=='__main__':
 
     #np.random.seed(2)
 
-    #sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0)
+    sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0)
     #check_LQR(N, dt, x0, xT)
     FIX_DP_EPSILON = True
     epsi_range = np.array([0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,4.0,6.0,8.0,10.0])
-    monteCarloSims(X, x0, xT, N, dt, del_t, FIX_DP_EPSILON, epsi_range,iters=100)
+    #monteCarloSims(X, x0, xT, N, dt, del_t, FIX_DP_EPSILON, epsi_range,iters=100)

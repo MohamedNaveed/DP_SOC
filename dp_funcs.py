@@ -25,7 +25,7 @@ R = 1.0
 Q = 100.0
 Qf = 500.0
 
-u_max = 1#5 for 1D #1 for 1D cos
+u_max = 1#5 for 1D #1 for 1D cos # 10 for linear
 
 def current_cost(x, u, xT, dt):
 
