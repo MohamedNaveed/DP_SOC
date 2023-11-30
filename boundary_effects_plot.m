@@ -1,16 +1,23 @@
 % plot boundary effect. 
 clc;clear;close all;
+
 %load("Data/dp_hjb_1dcos_n_200_N_300000_epsi0_domain_pi.mat");
 load("Data/dp_hjb_1dcos_n_200_N_300000_epsi2.mat");
+
+%load("Data/dp_hjb_1dcos_n_200_N_300000_epsi0.mat");
+%load("Data/dp_hjb_lqr_n_200_N_300000_epsi10_july11.mat");
+
 
 %%
 t_steps = double((0:N))*dt;
 
 x0 = 1;
+
 n_samples = 8;
 x = zeros(N+1,n_samples);
 
 epsilon = 2;
+
 
 for i = 1:n_samples
    
@@ -49,9 +56,8 @@ screenposition = get(fig,'Position');
 set(fig,...
     'PaperPosition',[0 0 screenposition(3:4)],...
     'PaperSize',[screenposition(3:4)]);
-print -dpdf -painters '/home/naveed/Dropbox/Research/Manuscripts/TAC22/plots/1_cos_traj_epsi2.pdf'
 
-
+print -dpdf -vector '1_cos_traj_epsi10.pdf'
 
 
 function [x_new] = model(x,u,dt, epsilon)
