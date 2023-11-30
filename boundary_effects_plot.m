@@ -1,16 +1,16 @@
 % plot boundary effect. 
 clc;clear;close all;
 %load("Data/dp_hjb_1dcos_n_200_N_300000_epsi0_domain_pi.mat");
-load("Data/dp_hjb_lqr_n_200_N_300000_epsi10_july11.mat");
+load("Data/dp_hjb_1dcos_n_200_N_300000_epsi2.mat");
 
 %%
 t_steps = double((0:N))*dt;
 
 x0 = 1;
-n_samples = 10;
+n_samples = 8;
 x = zeros(N+1,n_samples);
 
-epsilon = 10;
+epsilon = 2;
 
 for i = 1:n_samples
    
@@ -20,7 +20,7 @@ for i = 1:n_samples
         x_idx = find_nearest(X,x(t,i));
         u = u_global(t,x_idx);
 
-        x(t+1,i) = model(x(t,i), u, dt, epsilon);
+        x(t+1,i) = model(x(t,i), u, dt, epsilon); % change model for different systems
 
     end
 end
@@ -29,8 +29,8 @@ end
 
 fig = figure(1);
 hold on;
-t_idx = 1:100:N+1;
-plot(t_steps(t_idx), x(t_idx,1:10), 'LineWidth',2, 'HandleVisibility','off');
+t_idx = 1:1000:N+1;
+plot(t_steps(t_idx), x(t_idx,1:n_samples), 'LineWidth',2, 'HandleVisibility','off');
 %plot(t_steps, x(:,2), '--', 'LineWidth',2, 'DisplayName', 'epsilon = 0.2');
 %plot(t_steps, x(:,3), '--', 'LineWidth',2, 'DisplayName', 'epsilon = 0.8');
 xlabel('time');
@@ -39,39 +39,25 @@ plot(t_steps(t_idx), 2*ones(length(t_idx),1),'k','LineWidth', 2, 'DisplayName', 
 plot(t_steps(t_idx), -2*ones(length(t_idx),1),'k','LineWidth', 2, 'HandleVisibility','off');
 ylim([-3,3]);
 grid on;
-%h = legend();
+h = legend();
 font_size = 16;
 ax = gca;
 ax.FontSize = font_size; 
-%set(h,'FontSize',font_size);
+set(h,'FontSize',font_size);
 set(fig,'Units','inches');
 screenposition = get(fig,'Position');
 set(fig,...
     'PaperPosition',[0 0 screenposition(3:4)],...
     'PaperSize',[screenposition(3:4)]);
-%print -dpdf -painters '/home/naveed/Dropbox/Research/Manuscripts/TAC22/plots/traj_epsi10.pdf'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+print -dpdf -painters '/home/naveed/Dropbox/Research/Manuscripts/TAC22/plots/1_cos_traj_epsi2.pdf'
 
 
 
 
 function [x_new] = model(x,u,dt, epsilon)
 
-    x_dot = x + u ;
+    x_dot = -cos(x) + u ;
+    %x_dot = x + u ;
     x_new = x + x_dot*dt + epsilon*normrnd(0,1)*sqrt(dt);
 end
 

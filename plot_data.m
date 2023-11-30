@@ -1,7 +1,7 @@
 clc; clear;
 
-%load("Data/dp_hjb_1dcos_n_200_N_300000_epsi0_domain_pi.mat");
-load("Data/dp_hjb_lqr_n_200_N_300000_epsi10_july11.mat");
+load("Data/dp_hjb_1dpoly_n_200_N_300000_epsi0.mat");
+%load("Data/dp_hjb_lqr_n_200_N_300000_epsi10_july11.mat");
 
 t_steps = double((0:N))*dt;
 
@@ -80,15 +80,15 @@ end
 
 frame_frequency = 1000;
 font_size = 16;
-%for t=N+1:-frame_frequency:1
+for t=N+1:-frame_frequency:1
 %for t=299900:-frame_frequency:1
-for t=245000
+%for t=245000
     t
     
     fig = figure(1);
     plot(X, J(t,:),'r','LineWidth',3, 'DisplayName', 'HJB-FD');
     hold on;
-    plot(X, J_lqr(t,:),'b--','LineWidth',3, 'DisplayName', 'LQR');
+    %plot(X, J_lqr(t,:),'b--','LineWidth',3, 'DisplayName', 'LQR');
     ax = gca;
     ax.FontSize = 16; 
     xlabel('State','FontSize',font_size);
@@ -111,7 +111,7 @@ for t=245000
         figure(2);
         plot(X, u_global(t,:),'r','LineWidth',2, 'DisplayName', 'HJB-FD');
         hold on;
-        plot(X, u_lqr_global(t,:),'b--','LineWidth',2, 'DisplayName', 'LQR');
+        %plot(X, u_lqr_global(t,:),'b--','LineWidth',2, 'DisplayName', 'LQR');
         xlabel('X');
         ylabel('Control');
         title(['t = ', num2str(t)]);
