@@ -2,6 +2,7 @@
 # Author: Mohamed Naveed Gul Mohamed
 # email:mohdnaveed96@gmail.com
 # Date: Feb 21st 2021
+# Edited: July 2023
 from __future__ import division
 
 from dp_funcs import *
@@ -10,10 +11,10 @@ import numpy as np
 from scipy.io import savemat
 import time
 
-FILE_WRITE = False# False | True
+FILE_WRITE = True# False | True
 
 if FILE_WRITE:
-    filename = "stochastic_hjb_1dcos_T300000_X200_processNoise_e0.csv"
+    filename = "stochastic_hjb_1dcos_T300000_X200_processNoise_e0_10_feb6_iters1000.csv"
     file = open(filename,"a")
     file.write('epsilon' + ',' + 'Average Cost' + ',' + 'Cost variance' + ',' + 'Time taken' + '\n' )
 
@@ -314,9 +315,10 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
     
 
     #J, u = solve_DP_Bellman_v2(X, x0, xT, n, N, dt, epsilon)
-
+    start_exec = time.time()
     J, u = solve_DP_HJB(X, x0, xT, n, N, dt, epsilon)
-    
+    end_exec = time.time()
+    time_taken = (end_exec - start_exec)
     #J, u = solve_DP_Bellman(X, x0, xT, n, N, dt, epsilon)
 
     print('DP solved.')
@@ -349,6 +351,7 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
         cost_to_go[i] = J[i*factor_del_t,j]
     
     print("cost-to-go DP:", cost_to_go[0])
+    print("time taken:", time_taken)
     #plot_func(J,X,N,x_sol,cost_to_go,U_opti,dt)
     
     
@@ -389,7 +392,7 @@ def sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0):
     '''
     var_dic = {"u_dp": U_opti, "x_dp": x_sol, "N": N, "dt": dt,
                 "J": J, "u_global": u, "X": X}
-    savemat("dp_hjb_1dpoly_n_200_N_300000_epsi0.mat",var_dic)
+    savemat("dp_hjb_1dcos_n_200_N_300000_epsi0_feb6.mat",var_dic)
     
 def check_LQR(N, dt, x0, xT):
 
@@ -451,14 +454,14 @@ if __name__=='__main__':
     N = 300000 #number of time steps
     dt = 1.0/N #dt - time step for DP solution.
 
-    del_t = dt #0.01 #del_t - time step for model update.
+    del_t = 1000*dt #0.01 #del_t - time step for model update.
 
     X = np.linspace(-2,2,n) #space discretization
 
     #np.random.seed(2)
 
-    sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.0)
+    sampleTrial(X, x0, xT, N, dt, del_t, epsilon = 0.1)
     #check_LQR(N, dt, x0, xT)
-    FIX_DP_EPSILON = True
-    epsi_range = np.array([0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,4.0,6.0,8.0,10.0])
-    #monteCarloSims(X, x0, xT, N, dt, del_t, FIX_DP_EPSILON, epsi_range,iters=100)
+    #FIX_DP_EPSILON = False
+    #epsi_range = np.array([0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,4.0,6.0,8.0,10.0])
+    #monteCarloSims(X, x0, xT, N, dt, del_t, FIX_DP_EPSILON, epsi_range,iters=500)

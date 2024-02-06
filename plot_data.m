@@ -1,6 +1,6 @@
 clc; clear;
 
-load("Data/dp_hjb_1dpoly_n_200_N_300000_epsi0.mat");
+load("Data/dp_hjb_1dcos_n_200_N_300000_epsi0_feb6.mat");
 %load("Data/dp_hjb_lqr_n_200_N_300000_epsi10_july11.mat");
 
 t_steps = double((0:N))*dt;
@@ -12,19 +12,19 @@ plot(t_steps, x_lqr, 'Linewidth',2);
 xlabel('time');
 ylabel('state - lqr');
 saveas(fig,'dp_lqr/x_lqr.png');
-
+%}
 fig = figure(2);
 plot(t_steps, x_dp, 'Linewidth',2);
 xlabel('time');
 ylabel('state - DP');
-saveas(fig,'dp_lqr/x_dp.png');
+%saveas(fig,'dp_lqr/x_dp.png');
 
 fig = figure(3);
 plot(t_steps(1:end-1), u_dp, 'Linewidth',2);
 xlabel('time');
 ylabel('control - DP');
-saveas(fig,'dp_lqr/u_dp.png');
-
+%saveas(fig,'dp_lqr/u_dp.png');
+%{
 fig = figure(4);
 plot(t_steps(1:end-1), u_lqr, 'Linewidth',2);
 xlabel('time');
